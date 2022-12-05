@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
@@ -54,48 +55,57 @@ public class FirstStart : MonoBehaviour
 
 	public static void ShowPreview(string url)
 	{
+		//去掉前半截：D:\Works\editor_preview\Client\Assets\Content\
+		//保留后半截：CartoonFX\CFX Prefabs\Explosions\CFX_Enemy_Explosion (Colored).prefab
 		Clear();
-		
-		var urlPath = url.Replace(XPath.ContentPath,"");
-		var extension = Path.GetExtension(url);
-		switch (extension)
+
+		var urlPath = url.FormatPath();
+
+		try
 		{
-			//prefab
-			case ".prefab":
+			var extension = Path.GetExtension(url);
+			switch (extension)
 			{
-				XResource.LoadGameObject(urlPath, gameObj =>
+				//prefab
+				case ".prefab":
 				{
-					gameObj.transform.SetParent(Inst.PrefabContent.transform, false);
+					XResource.LoadGameObject(urlPath, gameObj =>
+					{
+						gameObj.transform.SetParent(Inst.PrefabContent.transform, false);
 					
-					//如果是粒子，则改为循环，方便预览
-					var particles = gameObj.GetComponentsInChildren<ParticleSystem>();
-					foreach (var ps in particles)
-					{
-						var main = ps.main;
-						main.loop= true;
-					}
-				});
-				break;	
-			}
+						//如果是粒子，则改为循环，方便预览
+						var particles = gameObj.GetComponentsInChildren<ParticleSystem>();
+						foreach (var ps in particles)
+						{
+							var main = ps.main;
+							main.loop= true;
+						}
+					});
+					break;	
+				}
 				
-			//材质球
-			case ".mat":
-				XResource.Load(urlPath, obj =>
-				{
-					var mat = obj as Material;
-					if (mat != null && mat.shader.name.Contains("FlipBook"))
+				//材质球
+				case ".mat":
+					XResource.Load(urlPath, obj =>
 					{
-						var renderer = Inst.SpriteAni.GetComponent<MeshRenderer>();
-						renderer.sharedMaterial = mat;
-						Inst.SpriteAni.SetActiveSafe(true);
-						return;
-					}
-					Dbg.LogError("所选的材质球不是序列帧动画类型，无法预览");
-				});
-				break;
-			default:
-				Dbg.LogError("不支持的文件类型:" + extension);
-				break;
+						var mat = obj as Material;
+						if (mat != null && mat.shader.name.Contains("FlipBook"))
+						{
+							var renderer = Inst.SpriteAni.GetComponent<MeshRenderer>();
+							renderer.sharedMaterial = mat;
+							Inst.SpriteAni.SetActiveSafe(true);
+							return;
+						}
+						throw new Exception("所选的材质球不是序列帧动画类型，无法预览");
+					});
+					break;
+				default:
+					throw new Exception("不支持的文件类型:" + extension);
+			}
+		}
+		catch (Exception e)
+		{
+			//Dbg.LogError(e);
 		}
 	}
 	

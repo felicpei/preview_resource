@@ -17,7 +17,7 @@ public static class ShellBuild
     {
 	    _buildPathIOS = XPath.RootPath + "BuildIOS/Ios";
 		_buildPathAndroid = XPath.RootPath + "Build_Android/Android.apk";
-        _buildPathWindows = XPath.RootPath + "Build_Windows/Dots.exe";
+        _buildPathWindows = XPath.RootPath + "Build_Windows/PreviewResource.exe";
         
         _buildOutWebGL =  XPath.RootPath + "nginx/html/";
         _buildOption = BuildOptions.None;
